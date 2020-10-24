@@ -45,9 +45,18 @@ public class Bot : MonoBehaviour
         
     }
 
+    void Evade()
+    {
+        Vector3 targetDirection = target.transform.position - transform.position;
+        float lookAhead = targetDirection.magnitude / (agent.speed + target.GetComponent<Drive>().currentSpeed);
+        Vector3 seekTarget = target.transform.position + target.transform.forward * lookAhead;
+        Flee(seekTarget);
+        Debug.DrawLine(transform.position, seekTarget, Color.red);
+    }
+
     // Update is called once per frame
     void Update()
     {
-        Pursue();
+        Evade();
     }
 }
