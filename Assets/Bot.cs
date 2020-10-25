@@ -88,9 +88,58 @@ public class Bot : MonoBehaviour
 
     }
 
+    void CleverHide()
+    {
+        float dist = Mathf.Infinity;
+        Vector3 chosenSpot = Vector3.zero;
+        Vector3 chosenDirection = Vector3.zero;
+        GameObject chosenGO = World.Instance.GetHidingSpots()[0]; //note: should null check.
+
+        for (int i = 0; i < World.Instance.GetHidingSpots().Length; i++)
+        {
+            Vector3 hideDir = World.Instance.GetHidingSpots()[i].transform.position - target.transform.position;
+            Vector3 hidePos = World.Instance.GetHidingSpots()[i].transform.position + hideDir.normalized * 5f; //magic number to get replaced later
+            if (Vector3.Distance(transform.position, hidePos) < dist)
+            {
+                chosenSpot = hidePos;
+                chosenDirection = hideDir;
+                chosenGO = World.Instance.GetHidingSpots()[i];
+                dist = Vector3.Distance(transform.position, hidePos);
+            }
+        }
+        Collider hideCollider = chosenGO.GetComponent<Collider>();
+        Ray backRay = new Ray(chosenSpot, -chosenDirection.normalized);
+        RaycastHit info;
+        float distance = 100.0f; //more magic numbers
+        hideCollider.Raycast(backRay, out info, distance);
+
+        Seek(info.point + chosenDirection.normalized * 5f);
+
+    }
+
+    bool CanSeeTarget()
+    {
+        RaycastHit raycastInfo;
+        Vector3 rayToTarget = target.transform.position - transform.position;
+        Debug.DrawRay(transform.position, rayToTarget);
+        if (Physics.Raycast(transform.position, rayToTarget, out raycastInfo))
+        {
+            if (raycastInfo.transform.gameObject.tag == "Cop")
+            {
+                return true; 
+            }
+            Debug.Log(raycastInfo.transform.gameObject.tag);
+        }
+        return false;
+
+    }
+
     // Update is called once per frame
     void Update()
     {
-        Hide();
+        if (CanSeeTarget())
+        {
+            CleverHide();
+        }
     }
 }
