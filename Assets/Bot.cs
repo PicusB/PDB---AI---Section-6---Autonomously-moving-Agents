@@ -11,6 +11,7 @@ public class Bot : MonoBehaviour
     public float wanderDistance = 20;
     public float wanderJitter = 1;
     Vector3 wanderTarget = Vector3.zero;
+    bool coolDown = false;
 
     // Start is called before the first frame update
     void Start()
@@ -134,12 +135,37 @@ public class Bot : MonoBehaviour
 
     }
 
+    bool TargetCanSeeMe()
+    {
+        Vector3 toAgent = transform.position - target.transform.position;
+        float lookingAngle = Vector3.Angle(target.transform.forward, toAgent);
+        if (lookingAngle < 60f)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    void BehaviourCoolDown()
+    {
+        coolDown = false;
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (CanSeeTarget())
+        if (!coolDown)
         {
-            CleverHide();
+            if (CanSeeTarget() && TargetCanSeeMe())
+            {
+                CleverHide();
+                coolDown = true;
+                Invoke("BehaviourCoolDown", 5f);
+            }
+            else
+            {
+                Pursue();
+            }
         }
     }
 }
