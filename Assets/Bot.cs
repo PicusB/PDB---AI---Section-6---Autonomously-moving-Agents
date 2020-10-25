@@ -10,6 +10,7 @@ public class Bot : MonoBehaviour
     public float wanderRadius = 10;
     public float wanderDistance = 20;
     public float wanderJitter = 1;
+    public float sightRadius = 10f;
     Vector3 wanderTarget = Vector3.zero;
     bool coolDown = false;
 
@@ -53,7 +54,7 @@ public class Bot : MonoBehaviour
 
     void Wander()
     {
-        wanderTarget += new Vector3(Random.Range(-1.0f, 1.0f) * wanderJitter, transform.position.y, Random.Range(-1.0f, 1.0f) * wanderJitter);
+        wanderTarget += new Vector3(Random.Range(-1.0f, 1.0f) * wanderJitter, 0, Random.Range(-1.0f, 1.0f) * wanderJitter);
         wanderTarget.Normalize();
         wanderTarget *= wanderRadius;
 
@@ -129,7 +130,6 @@ public class Bot : MonoBehaviour
             {
                 return true; 
             }
-            Debug.Log(raycastInfo.transform.gameObject.tag);
         }
         return false;
 
@@ -156,7 +156,11 @@ public class Bot : MonoBehaviour
     {
         if (!coolDown)
         {
-            if (CanSeeTarget() && TargetCanSeeMe())
+            if (Vector3.Distance(target.transform.position, transform.position)>sightRadius)
+            {
+                Wander();
+            }
+            else if (CanSeeTarget() && TargetCanSeeMe())
             {
                 CleverHide();
                 coolDown = true;
